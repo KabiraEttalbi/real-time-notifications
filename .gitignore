@@ -1,0 +1,39 @@
+# Maven
+**/target
+!.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+**/build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDEs
+/.idea/
+/*.iml
+*.ipr
+*.iws
+*.sw?
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.env
+
+# Logs
+*.log
+
+# Test reports
+/test-output/
+/surefire-reports/
+/jacoco.exec
+
+# Others
+*.class
+*.jar
+*.war
+*.ear
+scripts/
