@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Notifications Platform'">Notifications Platform</title>
+    
+    <!-- Bootstrap CSS -->
+    <link th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .event-card {
+            border-left: 4px solid #007bff;
+            margin-bottom: 10px;
+        }
+        .event-card.user-registered {
+            border-left-color: #28a745;
+        }
+        .event-card.notification-triggered {
+            border-left-color: #ffc107;
+        }
+        .event-card.user-action {
+            border-left-color: #dc3545;
+        }
+        .real-time-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/}">
+                <span class="real-time-indicator"></span>
+                Notifications Platform
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/notifications}">Notifications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/monitoring}">Monitoring</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-none d-md-block sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/}">
+                                <i class="fas fa-home"></i> Accueil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/register}">
+                                <i class="fas fa-user-plus"></i> Inscription
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/dashboard}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/notifications}">
+                                <i class="fas fa-bell"></i> Notifications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/monitoring}">
+                                <i class="fas fa-chart-line"></i> Monitoring
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-10 ms-sm-auto main-content">
+                <!-- Flash messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Page content -->
+                <div layout:fragment="content">
+                    <!-- Content will be inserted here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script th:src="@{/webjars/jquery/3.7.0/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <!-- WebSocket -->
+    <script th:src="@{/webjars/sockjs-client/1.5.1/sockjs.min.js}"></script>
+    <script th:src="@{/webjars/stomp-websocket/2.3.4/stomp.min.js}"></script>
+    
+    <!-- Custom JS -->
+    <script layout:fragment="scripts">
+        <!-- Page-specific scripts will be inserted here -->
+    </script>
+</body>
+</html>

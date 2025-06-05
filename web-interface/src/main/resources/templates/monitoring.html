@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Monitoring - Notifications Platform</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-chart-line"></i> Monitoring en Temps Réel
+                <span class="real-time-indicator"></span>
+            </h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métriques en temps réel -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tachometer-alt"></i> Métriques Système
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="metricsChart" width="400" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques des événements -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-pie-chart"></i> Répartition des Événements
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="eventsChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bell"></i> Types de Notifications
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="notificationsChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statut des services -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-server"></i> Statut des Services
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="service-status" id="userServiceStatus">
+                                        <i class="fas fa-circle text-success fa-2x"></i>
+                                        <h6 class="mt-2">User Service</h6>
+                                        <small class="text-muted">Port 8081</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="service-status" id="notificationServiceStatus">
+                                        <i class="fas fa-circle text-success fa-2x"></i>
+                                        <h6 class="mt-2">Notification Service</h6>
+                                        <small class="text-muted">Port 8082</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="service-status" id="eventPublisherStatus">
+                                        <i class="fas fa-circle text-success fa-2x"></i>
+                                        <h6 class="mt-2">Event Publisher</h6>
+                                        <small class="text-muted">Port 8083</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="service-status" id="loggingServiceStatus">
+                                        <i class="fas fa-circle text-success fa-2x"></i>
+                                        <h6 class="mt-2">Logging Service</h6>
+                                        <small class="text-muted">Port 8084</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs en temps réel -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list"></i> Logs en Temps Réel
+                            <span class="badge bg-success ms-2">Live</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="realTimeLogs" style="max-height: 400px; overflow-y: auto; font-family: monospace; background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                            <!-- Les logs en temps réel apparaîtront ici -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="scripts">
+        // Inclure Chart.js
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        document.head.appendChild(script);
+
+        let stompClient = null;
+        let metricsChart, eventsChart, notificationsChart;
+        
+        // Données pour les graphiques
+        let eventCounts = {
+            'USER_REGISTERED': 0,
+            'NOTIFICATION_TRIGGERED': 0,
+            'USER_ACTION_PERFORMED': 0
+        };
+        
+        let notificationTypes = {
+            'EMAIL': 0,
+            'SMS': 0,
+            'PUSH': 0
+        };
+
+        script.onload = function() {
+            initCharts();
+            connect();
+        };
+
+        function initCharts() {
+            // Graphique des métriques système
+            const metricsCtx = document.getElementById('metricsChart').getContext('2d');
+            metricsChart = new Chart(metricsCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Événements/min',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Graphique des événements
+            const eventsCtx = document.getElementById('eventsChart').getContext('2d');
+            eventsChart = new Chart(eventsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(eventCounts),
+                    datasets: [{
+                        data: Object.values(eventCounts),
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 205, 86)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+            // Graphique des notifications
+            const notificationsCtx = document.getElementById('notificationsChart').getContext('2d');
+            notificationsChart = new Chart(notificationsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(notificationTypes),
+                    datasets: [{
+                        label: 'Notifications',
+                        data: Object.values(notificationTypes),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 205, 86, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 205, 86, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function connect() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                
+                // S'abonner aux événements
+                stompClient.subscribe('/topic/events', function (event) {
+                    const eventData = JSON.parse(event.body);
+                    addLogEntry('USER_REGISTERED', eventData);
+                    eventCounts['USER_REGISTERED']++;
+                    updateCharts();
+                });
+                
+                stompClient.subscribe('/topic/notifications', function (notification) {
+                    const notificationData = JSON.parse(notification.body);
+                    addLogEntry('NOTIFICATION_TRIGGERED', notificationData);
+                    eventCounts['NOTIFICATION_TRIGGERED']++;
+                    notificationTypes[notificationData.type]++;
+                    updateCharts();
+                });
+                
+                stompClient.subscribe('/topic/actions', function (action) {
+                    const actionData = JSON.parse(action.body);
+                    addLogEntry('USER_ACTION_PERFORMED', actionData);
+                    eventCounts['USER_ACTION_PERFORMED']++;
+                    updateCharts();
+                });
+            });
+        }
+
+        function addLogEntry(type, data) {
+            const logsContainer = document.getElementById('realTimeLogs');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'mb-1';
+            
+            const timestamp = new Date().toLocaleString();
+            logEntry.innerHTML = `
+                <span class="text-muted">[${timestamp}]</span> 
+                <span class="badge bg-primary">${type}</span> 
+                ${JSON.stringify(data, null, 2)}
+            `;
+            
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+            
+            // Limiter à 50 entrées
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+        }
+
+        function updateCharts() {
+            // Mettre à jour le graphique des événements
+            eventsChart.data.datasets[0].data = Object.values(eventCounts);
+            eventsChart.update();
+            
+            // Mettre à jour le graphique des notifications
+            notificationsChart.data.datasets[0].data = Object.values(notificationTypes);
+            notificationsChart.update();
+            
+            // Mettre à jour les métriques système
+            const now = new Date().toLocaleTimeString();
+            const totalEvents = Object.values(eventCounts).reduce((a, b) => a + b, 0);
+            
+            if (metricsChart.data.labels.length > 20) {
+                metricsChart.data.labels.shift();
+                metricsChart.data.datasets[0].data.shift();
+            }
+            
+            metricsChart.data.labels.push(now);
+            metricsChart.data.datasets[0].data.push(totalEvents);
+            metricsChart.update();
+        }
+
+        function refreshData() {
+            // Simuler une actualisation des données
+            fetch('/api/logs')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Données actualisées:', data);
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        // Simuler le statut des services
+        function checkServiceStatus() {
+            const services = ['userServiceStatus', 'notificationServiceStatus', 'eventPublisherStatus', 'loggingServiceStatus'];
+            
+            services.forEach(serviceId => {
+                const element = document.getElementById(serviceId);
+                const icon = element.querySelector('i');
+                
+                // Simuler un statut aléatoire (en production, faire des vraies vérifications)
+                const isOnline = Math.random() > 0.1; // 90% de chance d'être en ligne
+                
+                if (isOnline) {
+                    icon.className = 'fas fa-circle text-success fa-2x';
+                } else {
+                    icon.className = 'fas fa-circle text-danger fa-2x';
+                }
+            });
+        }
+
+        // Vérifier le statut des services toutes les 30 secondes
+        setInterval(checkServiceStatus, 30000);
+    </script>
+</body>
+</html>

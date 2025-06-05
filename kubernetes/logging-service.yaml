@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logging-service
+  namespace: notifications-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logging-service
+  template:
+    metadata:
+      labels:
+        app: logging-service
+    spec:
+      containers:
+      - name: logging-service
+        image: ${YOUR_DOCKER_REGISTRY}/logging-service:1.0.0
+        ports:
+        - containerPort: 8084
+        env:
+        - name: MYSQL_HOST
+          value: "mysql"
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_DATABASE
+          value: "notifications_db"
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: KAFKA_BROKERS
+          value: "kafka:9092"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8084
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8084
+          initialDelaySeconds: 60
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logging-service
+  namespace: notifications-platform
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8084
+    targetPort: 8084
+  selector:
+    app: logging-service

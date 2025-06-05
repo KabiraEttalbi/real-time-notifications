@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-interface
+  namespace: notifications-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-interface
+  template:
+    metadata:
+      labels:
+        app: web-interface
+    spec:
+      containers:
+      - name: web-interface
+        image: ${YOUR_DOCKER_REGISTRY}/web-interface:1.0.0
+        ports:
+        - containerPort: 8085
+        env:
+        - name: MYSQL_HOST
+          value: "mysql"
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_DATABASE
+          value: "notifications_db"
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: KAFKA_BROKERS
+          value: "kafka:9092"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8085
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8085
+          initialDelaySeconds: 60
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-interface
+  namespace: notifications-platform
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8085
+    targetPort: 8085
+  selector:
+    app: web-interface

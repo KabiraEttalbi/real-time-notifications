@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Accueil - Notifications Platform</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+                    <h1 class="display-4">Plateforme de Notifications en Temps Réel</h1>
+                    <p class="lead">
+                        Bienvenue sur notre plateforme de notifications événementielle utilisant Apache Kafka et Spring Boot.
+                    </p>
+                    <hr class="my-4">
+                    <p>
+                        Cette plateforme permet de gérer les utilisateurs, envoyer des notifications en temps réel 
+                        et surveiller tous les événements du système.
+                    </p>
+                    <a class="btn btn-light btn-lg" th:href="@{/register}" role="button">Commencer</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-users text-primary"></i> Gestion des Utilisateurs
+                        </h5>
+                        <p class="card-text">
+                            Inscrivez de nouveaux utilisateurs et gérez leurs informations. 
+                            Chaque inscription déclenche automatiquement une notification de bienvenue.
+                        </p>
+                        <a th:href="@{/register}" class="btn btn-primary">Inscription</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-bell text-warning"></i> Notifications
+                        </h5>
+                        <p class="card-text">
+                            Envoyez des notifications personnalisées par email, SMS ou push. 
+                            Toutes les notifications sont traitées de manière asynchrone.
+                        </p>
+                        <a th:href="@{/notifications}" class="btn btn-warning">Envoyer</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-line text-success"></i> Monitoring
+                        </h5>
+                        <p class="card-text">
+                            Surveillez en temps réel tous les événements de la plateforme. 
+                            Visualisez les métriques et les logs d'audit.
+                        </p>
+                        <a th:href="@{/monitoring}" class="btn btn-success">Surveiller</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3>Architecture de la Plateforme</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Services Microservices</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>User Service:</strong> Gestion des utilisateurs et authentification
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Notification Service:</strong> Traitement des notifications multi-canaux
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Event Publisher:</strong> Publication d'événements métier
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Logging Service:</strong> Audit et logging des événements
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Technologies Utilisées</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>Apache Kafka:</strong> Broker de messages événementiel
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Spring Cloud Stream:</strong> Abstraction pour Kafka
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>MySQL:</strong> Base de données relationnelle
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Kubernetes:</strong> Orchestration des conteneurs
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

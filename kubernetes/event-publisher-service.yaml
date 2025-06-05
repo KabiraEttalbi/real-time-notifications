@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-publisher-service
+  namespace: notifications-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-publisher-service
+  template:
+    metadata:
+      labels:
+        app: event-publisher-service
+    spec:
+      containers:
+      - name: event-publisher-service
+        image: ${YOUR_DOCKER_REGISTRY}/event-publisher-service:1.0.0
+        ports:
+        - containerPort: 8083
+        env:
+        - name: KAFKA_BROKERS
+          value: "kafka:9092"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 60
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-publisher-service
+  namespace: notifications-platform
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8083
+    targetPort: 8083
+  selector:
+    app: event-publisher-service

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Notifications - Notifications Platform</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-bell"></i> Gestion des Notifications
+            </h1>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-paper-plane"></i> Envoyer une Notification
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/notifications/send}" th:object="${notification}" method="post">
+                            <div class="mb-3">
+                                <label for="userId" class="form-label">ID Utilisateur</label>
+                                <input type="text" class="form-control" id="userId" th:field="*{userId}"
+                                       th:classappend="${#fields.hasErrors('userId')} ? 'is-invalid' : ''"
+                                       placeholder="user-123">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('userId')}" 
+                                     th:errors="*{userId}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Type de Notification</label>
+                                <select class="form-select" id="type" th:field="*{type}"
+                                        th:classappend="${#fields.hasErrors('type')} ? 'is-invalid' : ''">
+                                    <option value="">Sélectionner un type</option>
+                                    <option value="EMAIL">Email</option>
+                                    <option value="SMS">SMS</option>
+                                    <option value="PUSH">Push Notification</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('type')}" 
+                                     th:errors="*{type}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Titre</label>
+                                <input type="text" class="form-control" id="title" th:field="*{title}"
+                                       th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                       placeholder="Titre de la notification">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" 
+                                     th:errors="*{title}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" th:field="*{message}" rows="4"
+                                          th:classappend="${#fields.hasErrors('message')} ? 'is-invalid' : ''"
+                                          placeholder="Contenu de la notification"></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('message')}" 
+                                     th:errors="*{message}"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="recipient" class="form-label">Destinataire</label>
+                                <input type="text" class="form-control" id="recipient" th:field="*{recipient}"
+                                       th:classappend="${#fields.hasErrors('recipient')} ? 'is-invalid' : ''"
+                                       placeholder="email@example.com ou +33123456789">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('recipient')}" 
+                                     th:errors="*{recipient}"></div>
+                                <div class="form-text">
+                                    Email pour EMAIL, numéro de téléphone pour SMS, ou ID utilisateur pour PUSH
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Envoyer la Notification
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Informations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Types de Notifications Supportés</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item">
+                                <strong>EMAIL:</strong> Envoi par email via SMTP
+                            </li>
+                            <li class="list-group-item">
+                                <strong>SMS:</strong> Envoi par SMS (simulation)
+                            </li>
+                            <li class="list-group-item">
+                                <strong>PUSH:</strong> Notification push mobile (simulation)
+                            </li>
+                        </ul>
+                        
+                        <h6>Processus d'Envoi</h6>
+                        <ol>
+                            <li>Création de l'événement <code>NotificationTriggered</code></li>
+                            <li>Publication dans Kafka</li>
+                            <li>Traitement asynchrone par le Notification Service</li>
+                            <li>Envoi effectif de la notification</li>
+                            <li>Logging de l'événement pour audit</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock"></i> Notifications Récentes
+                            <span class="badge bg-info ms-2">Live</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentNotifications" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Les notifications récentes apparaîtront ici -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="scripts">
+        let stompClient = null;
+
+        function connect() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                
+                stompClient.subscribe('/topic/notifications', function (notification) {
+                    const notificationData = JSON.parse(notification.body);
+                    addRecentNotification(notificationData);
+                });
+            });
+        }
+
+        function addRecentNotification(data) {
+            const container = document.getElementById('recentNotifications');
+            const notificationElement = document.createElement('div');
+            notificationElement.className = 'alert alert-info alert-dismissible fade show';
+            
+            const now = new Date().toLocaleTimeString();
+            notificationElement.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>${data.type}</strong> - ${data.title}
+                        <br>
+                        <small>À: ${data.recipient}</small>
+                    </div>
+                    <small>${now}</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            container.insertBefore(notificationElement, container.firstChild);
+            
+            // Limiter à 10 notifications
+            while (container.children.length > 10) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // Se connecter au démarrage
+        connect();
+    </script>
+</body>
+</html>

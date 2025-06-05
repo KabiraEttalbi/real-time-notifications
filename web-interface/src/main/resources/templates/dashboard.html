@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Dashboard - Notifications Platform</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+                <span class="real-time-indicator"></span>
+            </h1>
+        </div>
+
+        <!-- Statistiques en temps réel -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title" id="userCount">0</h4>
+                                <p class="card-text">Utilisateurs</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title" id="notificationCount">0</h4>
+                                <p class="card-text">Notifications</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-bell fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title" id="eventCount">0</h4>
+                                <p class="card-text">Événements</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-bolt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title" id="systemStatus">En ligne</h4>
+                                <p class="card-text">Statut Système</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-heartbeat fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Événements en temps réel -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-stream"></i> Événements en Temps Réel
+                            <span class="badge bg-success ms-2">Live</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="realTimeEvents" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Les événements en temps réel apparaîtront ici -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history"></i> Logs Récents
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <div th:each="log : ${logs}" class="event-card card mb-2">
+                                <div class="card-body py-2">
+                                    <small class="text-muted" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}"></small>
+                                    <div>
+                                        <strong th:text="${log.eventType}"></strong>
+                                        <br>
+                                        <small th:text="${log.userId}"></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="scripts">
+        let stompClient = null;
+        let userCount = 0;
+        let notificationCount = 0;
+        let eventCount = 0;
+
+        function connect() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                
+                // S'abonner aux événements
+                stompClient.subscribe('/topic/events', function (event) {
+                    const eventData = JSON.parse(event.body);
+                    addRealTimeEvent('USER_REGISTERED', eventData);
+                    userCount++;
+                    updateCounters();
+                });
+                
+                stompClient.subscribe('/topic/notifications', function (notification) {
+                    const notificationData = JSON.parse(notification.body);
+                    addRealTimeEvent('NOTIFICATION_TRIGGERED', notificationData);
+                    notificationCount++;
+                    updateCounters();
+                });
+                
+                stompClient.subscribe('/topic/actions', function (action) {
+                    const actionData = JSON.parse(action.body);
+                    addRealTimeEvent('USER_ACTION_PERFORMED', actionData);
+                    eventCount++;
+                    updateCounters();
+                });
+            });
+        }
+
+        function addRealTimeEvent(type, data) {
+            const eventsContainer = document.getElementById('realTimeEvents');
+            const eventElement = document.createElement('div');
+            eventElement.className = `event-card card mb-2 ${type.toLowerCase().replace('_', '-')}`;
+            
+            const now = new Date().toLocaleTimeString();
+            eventElement.innerHTML = `
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>${type}</strong>
+                            <br>
+                            <small class="text-muted">${JSON.stringify(data, null, 2)}</small>
+                        </div>
+                        <small class="text-muted">${now}</small>
+                    </div>
+                </div>
+            `;
+            
+            eventsContainer.insertBefore(eventElement, eventsContainer.firstChild);
+            
+            // Limiter à 20 événements
+            while (eventsContainer.children.length > 20) {
+                eventsContainer.removeChild(eventsContainer.lastChild);
+            }
+        }
+
+        function updateCounters() {
+            document.getElementById('userCount').textContent = userCount;
+            document.getElementById('notificationCount').textContent = notificationCount;
+            document.getElementById('eventCount').textContent = eventCount;
+        }
+
+        // Se connecter au démarrage
+        connect();
+    </script>
+</body>
+</html>
