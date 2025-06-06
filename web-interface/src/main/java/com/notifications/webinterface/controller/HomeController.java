@@ -20,37 +20,47 @@ public class HomeController {
     private WebInterfaceService webInterfaceService;
 
     @GetMapping("/")
-    public String home() {
-        return "index";
+    public String home(Model model) {
+        model.addAttribute("title", "Accueil - Notifications Platform");
+        model.addAttribute("content", "index");
+        model.addAttribute("scripts", "");
+        return "layout";
     }
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new UserRegistrationDto());
-        return "register";
+        model.addAttribute("title", "Inscription - Notifications Platform");
+        model.addAttribute("content", "register");
+        model.addAttribute("scripts", "");
+        return "layout";
     }
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserRegistrationDto user,
                               BindingResult result,
+                              Model model,
                               RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "register";
+            model.addAttribute("title", "Inscription - Notifications Platform");
+            model.addAttribute("content", "register");
+            model.addAttribute("scripts", "");
+            return "layout";
         }
 
         try {
             ResponseEntity<String> response = webInterfaceService.registerUser(user);
             if (response.getStatusCode().is2xxSuccessful()) {
-                redirectAttributes.addFlashAttribute("success", "User registered successfully!");
+                redirectAttributes.addFlashAttribute("success", "Utilisateur inscrit avec succès!");
                 webInterfaceService.logUserAction("system", "USER_REGISTRATION", 
                     "New user registered: " + user.getEmail());
                 return "redirect:/dashboard";
             } else {
-                redirectAttributes.addFlashAttribute("error", "Registration failed: " + response.getBody());
+                redirectAttributes.addFlashAttribute("error", "Échec de l'inscription: " + response.getBody());
                 return "redirect:/register";
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Registration failed: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Échec de l'inscription: " + e.getMessage());
             return "redirect:/register";
         }
     }
@@ -58,38 +68,51 @@ public class HomeController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("logs", webInterfaceService.getRecentLogs(10));
-        return "dashboard";
+        model.addAttribute("title", "Dashboard - Notifications Platform");
+        model.addAttribute("content", "dashboard");
+        model.addAttribute("scripts", "dashboard-scripts");
+        return "layout";
     }
 
     @GetMapping("/notifications")
     public String notifications(Model model) {
         model.addAttribute("notification", new NotificationDto());
-        return "notifications";
+        model.addAttribute("title", "Notifications - Notifications Platform");
+        model.addAttribute("content", "notifications");
+        model.addAttribute("scripts", "notifications-scripts");
+        return "layout";
     }
 
     @PostMapping("/notifications/send")
     public String sendNotification(@Valid @ModelAttribute("notification") NotificationDto notification,
                                   BindingResult result,
+                                  Model model,
                                   RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "notifications";
+            model.addAttribute("title", "Notifications - Notifications Platform");
+            model.addAttribute("content", "notifications");
+            model.addAttribute("scripts", "notifications-scripts");
+            return "layout";
         }
 
         try {
             webInterfaceService.sendNotification(notification);
-            redirectAttributes.addFlashAttribute("success", "Notification sent successfully!");
+            redirectAttributes.addFlashAttribute("success", "Notification envoyée avec succès!");
             webInterfaceService.logUserAction("admin", "NOTIFICATION_SENT", 
                 "Notification sent to: " + notification.getRecipient());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to send notification: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Échec de l'envoi: " + e.getMessage());
         }
 
         return "redirect:/notifications";
     }
 
     @GetMapping("/monitoring")
-    public String monitoring() {
-        return "monitoring";
+    public String monitoring(Model model) {
+        model.addAttribute("title", "Monitoring - Notifications Platform");
+        model.addAttribute("content", "monitoring");
+        model.addAttribute("scripts", "monitoring-scripts");
+        return "layout";
     }
 
     @GetMapping("/api/logs")

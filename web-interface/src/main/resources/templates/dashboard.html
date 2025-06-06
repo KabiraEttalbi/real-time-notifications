@@ -1,120 +1,117 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Dashboard - Notifications Platform</title>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-                <span class="real-time-indicator"></span>
-            </h1>
-        </div>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+            <span class="real-time-indicator"></span>
+        </h1>
+    </div>
 
-        <!-- Statistiques en temps réel -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-white bg-primary">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title" id="userCount">0</h4>
-                                <p class="card-text">Utilisateurs</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-users fa-2x"></i>
-                            </div>
+    <!-- Statistiques en temps réel -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" id="userCount">0</h4>
+                            <p class="card-text">Utilisateurs</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card text-white bg-warning">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title" id="notificationCount">0</h4>
-                                <p class="card-text">Notifications</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-bell fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title" id="eventCount">0</h4>
-                                <p class="card-text">Événements</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-bolt fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card text-white bg-info">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4 class="card-title" id="systemStatus">En ligne</h4>
-                                <p class="card-text">Statut Système</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-heartbeat fa-2x"></i>
-                            </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Événements en temps réel -->
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-stream"></i> Événements en Temps Réel
-                            <span class="badge bg-success ms-2">Live</span>
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="realTimeEvents" style="max-height: 400px; overflow-y: auto;">
-                            <!-- Les événements en temps réel apparaîtront ici -->
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" id="notificationCount">0</h4>
+                            <p class="card-text">Notifications</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-bell fa-2x"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history"></i> Logs Récents
-                        </h5>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" id="eventCount">0</h4>
+                            <p class="card-text">Événements</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-bolt fa-2x"></i>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div style="max-height: 400px; overflow-y: auto;">
-                            <div th:each="log : ${logs}" class="event-card card mb-2">
-                                <div class="card-body py-2">
-                                    <small class="text-muted" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}"></small>
-                                    <div>
-                                        <strong th:text="${log.eventType}"></strong>
-                                        <br>
-                                        <small th:text="${log.userId}"></small>
-                                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" id="systemStatus">En ligne</h4>
+                            <p class="card-text">Statut Système</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-heartbeat fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Événements en temps réel -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-stream"></i> Événements en Temps Réel
+                        <span class="badge bg-success ms-2">Live</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="realTimeEvents" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Les événements en temps réel apparaîtront ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history"></i> Logs Récents
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <div th:each="log : ${logs}" class="event-card card mb-2">
+                            <div class="card-body py-2">
+                                <small class="text-muted" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}"></small>
+                                <div>
+                                    <strong th:text="${log.eventType}"></strong>
+                                    <br>
+                                    <small th:text="${log.userId}"></small>
                                 </div>
                             </div>
                         </div>
@@ -124,7 +121,7 @@
         </div>
     </div>
 
-    <script layout:fragment="scripts">
+    <script>
         let stompClient = null;
         let userCount = 0;
         let notificationCount = 0;

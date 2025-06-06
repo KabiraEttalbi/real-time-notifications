@@ -8,6 +8,9 @@
     <!-- Bootstrap CSS -->
     <link th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" rel="stylesheet">
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <!-- Custom CSS -->
     <style>
         .navbar-brand {
@@ -16,6 +19,7 @@
         .sidebar {
             min-height: 100vh;
             background-color: #f8f9fa;
+            padding-top: 20px;
         }
         .main-content {
             padding: 20px;
@@ -40,11 +44,48 @@
             background-color: #28a745;
             border-radius: 50%;
             animation: pulse 2s infinite;
+            margin-right: 5px;
         }
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
+        }
+        .jumbotron {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 10px;
+        }
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .service-status {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .nav-link {
+            color: #495057;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
         }
     </style>
 </head>
@@ -127,7 +168,7 @@
                 </div>
 
                 <!-- Page content -->
-                <div layout:fragment="content">
+                <div th:replace="${content}">
                     <!-- Content will be inserted here -->
                 </div>
             </main>
@@ -138,16 +179,13 @@
     <script th:src="@{/webjars/jquery/3.7.0/jquery.min.js}"></script>
     <script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
     
-    <!-- Font Awesome -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    
     <!-- WebSocket -->
     <script th:src="@{/webjars/sockjs-client/1.5.1/sockjs.min.js}"></script>
     <script th:src="@{/webjars/stomp-websocket/2.3.4/stomp.min.js}"></script>
     
     <!-- Custom JS -->
-    <script layout:fragment="scripts">
+    <div th:replace="${scripts}">
         <!-- Page-specific scripts will be inserted here -->
-    </script>
+    </div>
 </body>
 </html>

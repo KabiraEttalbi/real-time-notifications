@@ -1,84 +1,122 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Inscription - Notifications Platform</title>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">
-                            <i class="fas fa-user-plus"></i> Inscription Utilisateur
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <form th:action="@{/register}" th:object="${user}" method="post">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" th:field="*{email}" 
-                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
-                                       placeholder="votre.email@example.com">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" 
-                                     th:errors="*{email}"></div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="firstName" class="form-label">Prénom</label>
-                                        <input type="text" class="form-control" id="firstName" th:field="*{firstName}"
-                                               th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"
-                                               placeholder="John">
-                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" 
-                                             th:errors="*{firstName}"></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="lastName" class="form-label">Nom</label>
-                                        <input type="text" class="form-control" id="lastName" th:field="*{lastName}"
-                                               th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"
-                                               placeholder="Doe">
-                                        <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" 
-                                             th:errors="*{lastName}"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Mot de passe</label>
-                                <input type="password" class="form-control" id="password" th:field="*{password}"
-                                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
-                                       placeholder="Minimum 6 caractères">
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" 
-                                     th:errors="*{password}"></div>
-                            </div>
-                            
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-user-plus"></i> S'inscrire
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus text-primary"></i> Inscription Utilisateur
+                    </h4>
                 </div>
-                
-                <div class="mt-4">
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-info-circle"></i> Que se passe-t-il après l'inscription ?</h6>
-                        <ul class="mb-0">
-                            <li>Votre compte est créé dans le système</li>
-                            <li>Un événement <code>UserRegistered</code> est publié</li>
-                            <li>Une notification de bienvenue est automatiquement envoyée</li>
-                            <li>L'événement est loggé pour audit</li>
-                        </ul>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form th:action="@{/register}" th:object="${user}" method="post">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </label>
+                                    <input type="email" class="form-control" id="email" th:field="*{email}" 
+                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                           placeholder="votre.email@example.com">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" 
+                                         th:errors="*{email}"></div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="firstName" class="form-label">
+                                                <i class="fas fa-user"></i> Prénom
+                                            </label>
+                                            <input type="text" class="form-control" id="firstName" th:field="*{firstName}"
+                                                   th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"
+                                                   placeholder="John">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" 
+                                                 th:errors="*{firstName}"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="lastName" class="form-label">
+                                                <i class="fas fa-user"></i> Nom
+                                            </label>
+                                            <input type="text" class="form-control" id="lastName" th:field="*{lastName}"
+                                                   th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"
+                                                   placeholder="Doe">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" 
+                                                 th:errors="*{lastName}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock"></i> Mot de passe
+                                    </label>
+                                    <input type="password" class="form-control" id="password" th:field="*{password}"
+                                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                                           placeholder="Minimum 6 caractères">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" 
+                                         th:errors="*{password}"></div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-user-plus"></i> S'inscrire
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-rocket text-primary" style="font-size: 4rem;"></i>
+                                <h5 class="mt-3">Rejoignez la plateforme !</h5>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Que se passe-t-il après l'inscription ?</h6>
+                                <ul class="mb-0">
+                                    <li><i class="fas fa-check text-success"></i> Votre compte est créé dans le système</li>
+                                    <li><i class="fas fa-check text-success"></i> Un événement <code>UserRegistered</code> est publié</li>
+                                    <li><i class="fas fa-check text-success"></i> Une notification de bienvenue est automatiquement envoyée</li>
+                                    <li><i class="fas fa-check text-success"></i> L'événement est loggé pour audit</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-shield-alt"></i> Sécurité</h6>
+                                <p class="mb-0">Vos données sont sécurisées et votre mot de passe est chiffré avant stockage.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Validation en temps réel
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === '') {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
